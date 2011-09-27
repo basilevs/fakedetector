@@ -25,7 +25,7 @@ object QueueParser {
 	}
 	def parseDownloads(elem:Node): Iterable[HashedFile] = {
 		if (elem.label != "Downloads")
-			throw new MatchError(elem)
+			throw new ParseError("Invalid XML entry "+elem)
 		(elem \ "Download").map(parseDownload)
 		
 	}
@@ -35,9 +35,12 @@ object QueueParser {
 
 class QueueWatcher(path: Path, hashedFilesReceiver:(HashedFile) => Unit) {
 	val watcher = new FileWatcher(path, ()=>this.onChange)
+	onChange
 	private def onChange {
-		val fs=Files.newInputStream(path)
-		QueueParser.parse(fs).foreach(hashedFilesReceiver(_))
+		if (Files.size(path) > 0) {
+			val fs=Files.newInputStream(path)
+			QueueParser.parse(fs).foreach(hashedFilesReceiver(_))
+		}
 	}
 }
 

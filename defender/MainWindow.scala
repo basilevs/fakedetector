@@ -65,7 +65,7 @@ class MainWindow extends MainFrame {
 	val fakes = new scala.collection.mutable.HashMap[Hash, Fake]()
 
 	title = "Fake Defender"
-	bounds = new Rectangle(100,100,300,100);
+//	bounds = new Rectangle(100,100,300,100);
 	val tabs = new TabbedPane();
 	this.contents=tabs; // add the panel to frame
 	val reportedTableModel = new ReportedTableModel(repoted) 
