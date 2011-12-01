@@ -7,9 +7,19 @@ import java.io.{BufferedReader, InputStreamReader}
 import java.nio.charset.Charset
 
 trait FakeStorage {
-	def remove(fake:Fake)
-	def add(fake:Fake)
+	def update(toAdd:Iterator[Fake], toDelete:Iterator[Fake] = null)
 }
+
+//Deletes fakes that are not readded
+class FakeStoragePurger(toUpdate:FakeStorage) extends FakeStorage {
+	var fakes = Set[Fake]()
+	def update(toAdd:Iterator[Fake], toDeleteIgnored:Iterator[Fake]) {
+		assert(toDeleteIgnored == null || !toDeleteIgnored.hasNext)
+		val newFakes = Set[Fake](toAdd.toSeq:_*)
+		toUpdate.update(toAdd, (fakes -- newFakes).iterator)		
+	}
+}
+
 
 class FakeTableParser(reader: BufferedReader) extends Iterator[Fake] {
 	var current: Fake = read
@@ -41,7 +51,7 @@ class FakeTable(url: URL, charset:Charset, storage: FakeStorage) {
 	def this(url:URL, storage:FakeStorage) = this(url, FakeTableParser.getCharset(url), storage)
 	val thread = new Thread() {
 		override def run {
-			new FakeTableParser(reader).foreach(storage.add)
+			storage.update(new FakeTableParser(reader))
 			Thread.sleep(60000)
 		}
 	}
