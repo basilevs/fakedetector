@@ -34,7 +34,7 @@ object QueueParser {
 }
 
 class QueueWatcher(path: Path, hashedFilesReceiver:(HashedFile) => Unit) {
-	val watcher = new FileWatcher(path, ()=>this.onChange)
+	val watcher = FileWatcher(path, ()=>this.onChange)
 	onChange
 	private def onChange {
 		if (Files.size(path) > 0) {

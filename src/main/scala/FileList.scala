@@ -4,7 +4,7 @@ import scala.xml.{Node, XML, SpecialNode}
 import java.io.InputStream
 import java.nio.file.{Files, Path, Paths}
 
-import org.apache.tools.bzip2.CBZip2InputStream
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 
 import fake.util.{TTHHash, HashedFile, ParseError}
 
@@ -62,7 +62,7 @@ class FileListParser(shares:Map[String, Path])  {
 		if (stream.read != 0x5a || stream.read != 0x42) {
 			throw new ParseError("Bzipped stream has invalid header")
 		}
-		parseStream(new CBZip2InputStream(stream))
+		parseStream(new BZip2CompressorInputStream(stream))
 	}
 	def parseFile(path: Path) = parseBzippedStream(Files.newInputStream(path))
 }
@@ -86,7 +86,7 @@ object SettingsParser {
 }
 
 class FileListWatcher(path: Path, settings: Path, hashedFilesReceiver:(HashedFile) => Unit) {
-	val watcher = new FileWatcher(path, onChange)
+	val watcher = FileWatcher(path, onChange)
 	val shares = SettingsParser.parseStream(Files.newInputStream(settings))
 	onChange
 	private def onChange() {
