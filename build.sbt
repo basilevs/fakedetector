@@ -11,3 +11,4 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-compress" % "1.3"
 )
 
+scalacOptions += "-deprecation"

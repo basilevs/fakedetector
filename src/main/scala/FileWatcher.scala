@@ -48,10 +48,10 @@ class FileWatcher(watchService: WatchService) extends Closeable with Set[FileWat
 				do {
 					val key = watchService.take()
 					val directoryListeners = listeners(key)
-					for (val event <- JavaConversions.asScalaIterable(key.pollEvents)) {
+					for (event <- JavaConversions.collectionAsScalaIterable(key.pollEvents)) {
 						val eventPath = event.context.asInstanceOf[Path]
 //						println("Path %s modified. New size: %d".format(path.toString(), path.toFile.length))
-						for (val listener <- directoryListeners) {
+						for (listener <- directoryListeners) {
 							if (listener.path.getFileName == eventPath) {
 								try {
 										listener.callback()

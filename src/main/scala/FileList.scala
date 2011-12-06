@@ -1,6 +1,7 @@
 package fake.defender
 
 import scala.xml.{Node, XML, SpecialNode}
+import scala.math.min
 import java.io.InputStream
 import java.nio.file.{Files, Path, Paths}
 
@@ -18,7 +19,7 @@ class FileListParser(shares:Map[String, Path])  {
 		println(rv)
 		rv
 	}
-	def truncate(s:String) = s.substring(0, Math.min(50, s.length))
+	def truncate(s:String) = s.substring(0, min(50, s.length))
 	//<Directory Name="dotNetFramework">
 	def parseDirectory(path:Path, node: Node): Iterable[HashedFile] = {
 		val dirPath = path.resolve((node \ "@Name").text)
