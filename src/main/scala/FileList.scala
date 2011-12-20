@@ -78,17 +78,17 @@ object SettingsParser {
 	</Share>
 </DCPlusPlus>
 */
-	def parse(node:Node):Map[String, Path] = {
+	def parseShares(node:Node):Map[String, Path] = {
 		(for (share <- (node \\ "Share"); dir <- (share \ "Directory")) yield {
 			((dir \ "@Virtual").text, Paths.get(dir.text))
 		}).toMap
 	}
-	def parseStream(stream: InputStream): Map[String, Path] = parse(XML.load(stream))
+	def parseStreamForShares(stream: InputStream): Map[String, Path] = parseShares(XML.load(stream))
 }
 
 class FileListWatcher(path: Path, settings: Path, hashedFilesReceiver:(HashedFile) => Unit) {
 	val watcher = FileWatcher(path, onChange)
-	val shares = SettingsParser.parseStream(Files.newInputStream(settings))
+	val shares = SettingsParser.parseStreamForShares(Files.newInputStream(settings))
 	onChange
 	private def onChange() {
 		new FileListParser(shares).parseFile(path).foreach(hashedFilesReceiver(_))

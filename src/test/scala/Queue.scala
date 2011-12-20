@@ -1,11 +1,14 @@
 import scala.actors.Actor.{actor, receive}
 import scala.actors.DaemonActor
+import org.scalatest.FunSuite
 
 import java.io.{File, FileWriter, StringReader}
 
 import fake.defender._
 import fake.util._
 
+
+class QueueSuite extends FunSuite {
 val data ="""
 <Downloads Version="2.22">
 <Download Target="\\pebble.local\anime\NieA under 7\NieA_under_7_TV_[06_of_13]_[ru_jp]_[Suzaku_&amp;_AnimeReactor_Ru].mkv" Size="415436119" Priority="3" Added="1315632928" TTH="NSYCUU4QSTWCIBTKZET32G3UEEUNSBJFQ4UC4FA" AutoPriority="0" MaxSegments="7">
@@ -40,3 +43,4 @@ fw.write(data)
 fw.close
 Thread.sleep(100)
 assert(event)
+}

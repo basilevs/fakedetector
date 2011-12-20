@@ -4,7 +4,9 @@ import fake.util._
 import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
 import java.nio.file.Paths
+import org.scalatest.FunSuite
 
+class FileListSuite extends FunSuite {
 val data = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <FileListing Version="1" CID="QDM5KPQWER4HYOCXMSFFW6DOULLU5SUROMDMLCQ" Base="/" Generator="DC++ 0.7091">
 <Directory Name="software">
@@ -35,3 +37,4 @@ val shares = Map(("software", Paths.get("d:", "soft")))
 val parsed = new FileListParser(shares).parseStream(new ByteArrayInputStream(data)).toArray
 assert(parsed(0).path == Paths.get("software", "development", "MySQL Manager 3.7.0.1", "file_id.diz"))
 assert(parsed(3).path == Paths.get("software", "development", "Visual Studio 2008 Express Edition", "VCExpress", "WCU", "RDBG", "x64", "expdbgsetup.exe"))
+}

@@ -1,21 +1,17 @@
 package fake.defender
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.HashSet
 import fake.util._
 
 // Filters hashed files through a set of fakes and notifies receiver with ReportedFake
-class FakeMatcher(receiver: ReportedFake=>Unit) extends FakeStorage {
-	val fakes = new HashMap[Hash, Fake]()
-	def process(file: HashedFile) {
-		val fakeOption =  fakes.get(file.hash)
-		if (!fakeOption.isEmpty) {
-			if (fakeOption.get.matches(file)) {
-				receiver(new ReportedFake(file, fakeOption.get))
-			}
-		}
+class FakeMatcher(fakes:FakeSource, receiver: ReportedFake=>Unit) {
+	val reported = new HashSet[ReportedFake]()
+	def report(r:ReportedFake) {
+		//This is not typesafe, but of low importance
+		if (! reported.contains(r))
+			receiver(r)
 	}
-	def update(toAdd:Iterator[Fake], toDelete:Iterator[Fake]) {
-		fakes ++ toAdd.map(x=>(x.hash, x))
-		fakes -- toDelete.map(_.hash)
+	def process(file: HashedFile) {
+		fakes.matches(file).filter(_.matches(file)).foreach(fake => report(new ReportedFake(file, fake)))
 	}
 }

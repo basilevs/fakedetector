@@ -6,25 +6,11 @@ import java.net.URL
 import java.io.{BufferedReader, InputStreamReader}
 import java.nio.charset.Charset
 
-trait FakeStorage {
-	def update(toAdd:Iterator[Fake], toDelete:Iterator[Fake] = null)
-}
-
-//Deletes fakes that are not readded
-class FakeStoragePurger(toUpdate:FakeStorage) extends FakeStorage {
-	var fakes = Set[Fake]()
-	def update(toAdd:Iterator[Fake], toDeleteIgnored:Iterator[Fake]) {
-		assert(toDeleteIgnored == null || !toDeleteIgnored.hasNext)
-		val newFakes = Set[Fake](toAdd.toSeq:_*)
-		toUpdate.update(toAdd, (fakes -- newFakes).iterator)		
-	}
-}
-
-
 class FakeTableParser(reader: BufferedReader) extends Iterator[Fake] {
 	var current: Fake = read
 	private def read = {
 		val line = reader.readLine
+//		println("Line:"+line)
 		if (line == null) {
 			null
 		} else {
@@ -44,15 +30,20 @@ class FakeTableParser(reader: BufferedReader) extends Iterator[Fake] {
 	}
 }
 
-class FakeTable(url: URL, charset:Charset, storage: FakeStorage) {
+class FakeTable(url: URL, charset:Charset, storage: FakeSource)  extends FakeSource {
+	var fakes = fileIterator.toSet
+	def iterator = fakes.iterator
 	def reader = {
 		new BufferedReader(new InputStreamReader(url.openStream, charset))
 	}
-	def this(url:URL, storage:FakeStorage) = this(url, FakeTableParser.getCharset(url), storage)
+	def fileIterator = new FakeTableParser(reader)
+	def this(url:URL, storage:FakeSource) = this(url, FakeTableParser.getCharset(url), storage)
 	val thread = new Thread() {
 		override def run {
-			storage.update(new FakeTableParser(reader))
-			Thread.sleep(60000)
+			while (true) {
+				fakes = fileIterator.toSet
+				Thread.sleep(60000)
+			}
 		}
 	}
 	thread.setDaemon(true)
