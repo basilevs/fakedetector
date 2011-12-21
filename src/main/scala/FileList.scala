@@ -7,7 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 
-import fake.util.{TTHHash, HashedFile, ParseError}
+import fake.util.{TTHHash, HashedFile, ParseError, HashedFileSource}
 
 
 
@@ -16,7 +16,7 @@ class FileListParser(shares:Map[String, Path])  {
 	def parseFile(path:Path, node: Node) = {
 		val name = (node \ "@Name").text
 		val rv = new HashedFile(name, new TTHHash((node \ "@TTH").text), path.resolve(name))
-		println(rv)
+//		println(rv)
 		rv
 	}
 	def truncate(s:String) = s.substring(0, min(50, s.length))
@@ -24,7 +24,7 @@ class FileListParser(shares:Map[String, Path])  {
 	def parseDirectory(path:Path, node: Node): Iterable[HashedFile] = {
 		val dirPath = path.resolve((node \ "@Name").text)
 		val subItemSeqs = for (item <- node.nonEmptyChildren if !item.isInstanceOf[SpecialNode]) yield {
-			println("Directory:"+dirPath)
+//			println("Directory:"+dirPath)
 			try {
 				item.label match {
 					case "Directory" => parseDirectory(dirPath, item)
@@ -40,16 +40,16 @@ class FileListParser(shares:Map[String, Path])  {
 	def parseListing(node:Node) = {
 		if (node.label != "FileListing")
 			throw new ParseError("Invalid XML entry "+node)
-		println("Filelisting")
+//		println("Filelisting")
 		val subItemSeqs = for (item <- (node \ "Directory")) yield {
 			val name = (node \ "@Name").text
 			try {
 				val path = shares.get(name)
 				if (path.isEmpty) {
-					println("Directory:"+name)
+//					println("Directory:"+name)
 					parseDirectory(Paths.get(""), item)
 				} else {
-					println("Directory:"+path.get)
+//					println("Directory:"+path.get)
 					parseDirectory(path.get, item)
 				}
 			} catch {
@@ -86,11 +86,16 @@ object SettingsParser {
 	def parseStreamForShares(stream: InputStream): Map[String, Path] = parseShares(XML.load(stream))
 }
 
-class FileListWatcher(path: Path, settings: Path, hashedFilesReceiver:(HashedFile) => Unit) {
+class FileListWatcher(val path: Path, val settings: Path) extends HashedFileSource {
+	override def hashCode = path.hashCode ^ settings.hashCode
+	override def equals(that:Any) = that match {
+		case t: FileListWatcher => t.path == path && t.settings == settings
+		case _ => false
+	}
 	val watcher = FileWatcher(path, onChange)
 	val shares = SettingsParser.parseStreamForShares(Files.newInputStream(settings))
 	onChange
 	private def onChange() {
-		new FileListParser(shares).parseFile(path).foreach(hashedFilesReceiver(_))
+		new FileListParser(shares).parseFile(path).foreach(onFile)
 	}
 }

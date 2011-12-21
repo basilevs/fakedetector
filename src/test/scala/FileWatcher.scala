@@ -6,8 +6,8 @@ import org.scalatest.FunSuite
 
 
 class WatcherSuite extends FunSuite {
-	val paths = Array("src", "lib", "src") map (p => Paths.get(p).toAbsolutePath)
-	paths map println
+	val paths = Array("src", "target", "src") map (p => Paths.get(p).toAbsolutePath)
+//	paths map println
 	test("keys are the same for the same path") {
 		val service = paths(0).getFileSystem.newWatchService
 		def register(path:Path) = {

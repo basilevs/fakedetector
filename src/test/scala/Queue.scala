@@ -16,31 +16,37 @@ val data ="""
 </Download>
 </Downloads>
 """
-
-val parsed:Array[HashedFile] = QueueParser.parse(new StringReader(data)).toArray
-assert(parsed.length == 1)
-println (parsed(0).name)
-assert(parsed(0).name == "NieA_under_7_TV_[06_of_13]_[ru_jp]_[Suzaku_&_AnimeReactor_Ru].mkv")
-println (parsed(0).hash)
-assert(parsed(0).hash.toString == "NSYCUU4QSTWCIBTKZET32G3UEEUNSBJFQ4UC4FA")
-
-val file = File.createTempFile("queue", ".tmp")
-file.deleteOnExit
-var event = false
-val hashedFilePrinter = new DaemonActor {
-	def act {
-		while (true) receive {
-			case hf:HashedFile => {assert(hf.hash.toString == "NSYCUU4QSTWCIBTKZET32G3UEEUNSBJFQ4UC4FA"); event = true;}
-			case _ => println("No match!")
-		}
+	test("memory parsing") {
+		val parsed:Array[HashedFile] = QueueParser.parse(new StringReader(data)).toArray
+		assert(parsed.length == 1)
+		println (parsed(0).name)
+		assert(parsed(0).name == "NieA_under_7_TV_[06_of_13]_[ru_jp]_[Suzaku_&_AnimeReactor_Ru].mkv")
+		println (parsed(0).hash)
+		assert(parsed(0).hash.toString == "NSYCUU4QSTWCIBTKZET32G3UEEUNSBJFQ4UC4FA")
 	}
-}
-hashedFilePrinter.start
-val qw = new fake.defender.QueueWatcher(file.toPath, hashedFilePrinter.!)
-Thread.sleep(100)
-val fw = new FileWriter(file)
-fw.write(data)
-fw.close
-Thread.sleep(100)
-assert(event)
+
+	test("on file change") {
+		val file = File.createTempFile("queue", ".tmp")
+		file.deleteOnExit
+		var event = false
+		val hashedFilePrinter = new DaemonActor {
+			def act {
+				while (true) receive {
+					case hf:HashedFile => {
+						assert(hf.hash.toString == "NSYCUU4QSTWCIBTKZET32G3UEEUNSBJFQ4UC4FA")
+						event = true
+					}
+					case _ => println("No match!")
+				}
+			}
+		}
+		hashedFilePrinter.start
+		val qw = new fake.defender.QueueWatcher(file.toPath, hashedFilePrinter.!)
+		Thread.sleep(100)
+		val fw = new FileWriter(file)
+		fw.write(data)
+		fw.close
+		Thread.sleep(100)
+		assert(event)
+	}
 }

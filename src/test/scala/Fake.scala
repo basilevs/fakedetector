@@ -8,12 +8,12 @@ import java.net.{URL, URLConnection}
 import org.scalatest.FunSuite
 
 class FakeSuite extends FunSuite {
-	test("fake") {
+	test("hash equality") {
 		val hash = "FNFRK6TMBUPBSZCSNXT3GQOQMZAQCDXS5GWSZRQ"
-		println("Fake hash")
 		assert(new TTHHash(hash) == new TTHHash(hash))
 		assert(new TTHHash(hash) != new TTHHash(hash.replace('Q', 'T')))
-
+	}
+	test("memory parsing and name matching") {
 		val data = """AHJZPQFJUXA5YQZ72EKCANIQUQHJ7XGKRNGMTJI	Гадкий я DVD	Лестница Якоба	03.09.2010 21:55:09	SergeT
 V53BQXWZJNKBBUUOHKCWO7R66K25EU5MV32NQMI	Интерны (31 серия)	Интерны 28	06.09.2010 16:29:51	ARTchi
 """
@@ -27,7 +27,7 @@ V53BQXWZJNKBBUUOHKCWO7R66K25EU5MV32NQMI	Интерны (31 серия)	Инте�
 		assert(fakes(0).matches(new HashedFile("DVD Гадкий я.mkv", new TTHHash("AHJZPQFJUXA5YQZ72EKCANIQUQHJ7XGKRNGMTJI"))))
 		assert(!fakes(0).matches(new HashedFile("Гадкий я.mkv", new TTHHash("AHJZPQFJUXA5YQZ72EKCANIQUQHJ7XGKRNGMTJI"))))
 
-
+/*
 		val url = new URL("http://magnetida.ru/fakes/faketext.asp")
 		val conn = url.openConnection;
 		conn.connect
@@ -38,5 +38,6 @@ V53BQXWZJNKBBUUOHKCWO7R66K25EU5MV32NQMI	Интерны (31 серия)	Инте�
 		} else {
 			println("No data from atlantida")
 		}
+*/
 	}
 }

@@ -34,7 +34,9 @@ val data = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 """.getBytes(Charset.forName("UTF-8"))
 
 val shares = Map(("software", Paths.get("d:", "soft")))
-val parsed = new FileListParser(shares).parseStream(new ByteArrayInputStream(data)).toArray
-assert(parsed(0).path == Paths.get("software", "development", "MySQL Manager 3.7.0.1", "file_id.diz"))
-assert(parsed(3).path == Paths.get("software", "development", "Visual Studio 2008 Express Edition", "VCExpress", "WCU", "RDBG", "x64", "expdbgsetup.exe"))
+	test("memory parsing") {
+		val parsed = new FileListParser(shares).parseStream(new ByteArrayInputStream(data)).toArray
+		assert(parsed(0).path == Paths.get("software", "development", "MySQL Manager 3.7.0.1", "file_id.diz"))
+		assert(parsed(3).path == Paths.get("software", "development", "Visual Studio 2008 Express Edition", "VCExpress", "WCU", "RDBG", "x64", "expdbgsetup.exe"))
+	}
 }
