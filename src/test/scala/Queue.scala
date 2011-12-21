@@ -17,7 +17,7 @@ val data ="""
 </Downloads>
 """
 	test("memory parsing") {
-		val parsed:Array[HashedFile] = QueueParser.parse(new StringReader(data)).toArray
+		val parsed:Array[HashedFile] = QueueParser.parse(new StringReader(data), null).toArray
 		assert(parsed.length == 1)
 		println (parsed(0).name)
 		assert(parsed(0).name == "NieA_under_7_TV_[06_of_13]_[ru_jp]_[Suzaku_&_AnimeReactor_Ru].mkv")
@@ -41,7 +41,7 @@ val data ="""
 			}
 		}
 		hashedFilePrinter.start
-		val qw = new fake.defender.QueueWatcher(file.toPath, hashedFilePrinter.!)
+		val qw = new fake.defender.QueueWatcher(file.toPath) {onFile = hashedFilePrinter.!}
 		Thread.sleep(100)
 		val fw = new FileWriter(file)
 		fw.write(data)
