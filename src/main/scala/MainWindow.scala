@@ -12,7 +12,7 @@ import java.util.{Locale, ResourceBundle}
 import fake.util.{Hash,Fake,FakeReport}
 
 object Messages {
-	val bundle = ResourceBundle.getBundle("fake.defender.MessagesBundle", Locale.getDefault())
+	val bundle = ResourceBundle.getBundle("MessagesBundle", Locale.getDefault())
 	def apply(key: String): String = bundle.getString(key)
 }
 
@@ -73,4 +73,10 @@ class MainWindow extends MainFrame {
 	tabs.pages+=new TabbedPane.Page(Messages("Known_fakes"), new Table(){model = fakeTableModel})
 	visible = true
 	def onReport(report:FakeReport) {}
+}
+
+object Gui extends swing.SimpleSwingApplication {
+	def top = {
+		new MainWindow()
+	}
 }
